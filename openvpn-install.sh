@@ -333,6 +333,17 @@ user nobody
 group $group_name
 persist-key
 persist-tun
+#Custom
+hand-window 120
+fast-io
+sndbuf 0
+rcvbuf 0
+allow-pull-fqdn
+tcp-nodelay
+replay-window 256
+float
+duplicate-cn
+#close
 verb 3
 crl-verify crl.pem" >> /etc/openvpn/server/server.conf
 	if [[ "$protocol" = "udp" ]]; then
@@ -418,7 +429,8 @@ WantedBy=multi-user.target" >> /etc/systemd/system/openvpn-iptables.service
 	# If the server is behind NAT, use the correct IP address
 	[[ -n "$public_ip" ]] && ip="$public_ip"
 	# client-common.txt is created so we have a template to add further users later
-	echo "client
+	echo "# OVPN_ACCESS_SERVER_PROFILE=[4TUNNEL]
+client
 dev tun
 proto $protocol
 remote $ip $port
@@ -429,6 +441,7 @@ persist-tun
 remote-cert-tls server
 auth SHA512
 ignore-unknown-option block-outside-dns
+auth-user-pass
 verb 3" > /etc/openvpn/server/client-common.txt
 	# Enable and start the OpenVPN service
 	systemctl enable --now openvpn-server@server.service
